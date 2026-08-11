@@ -134,10 +134,12 @@ function App() {
     setError('')
 
     try {
-      const response = await fetch(`${API_BASE}/simulate`, {
+      // 1. Gradio automatically mounts the API at /call/predict
+      const response = await fetch(`${API_BASE}/call/predict`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ policy_name: policy }),
+        // 2. Gradio expects inputs to be wrapped inside a "data" array
+        body: JSON.stringify({ data: [policy] }),
       })
 
       if (!response.ok) {
@@ -145,15 +147,18 @@ function App() {
         throw new Error(payload.detail || 'Simulation request failed')
       }
 
-      const data = await response.json()
-      setResult(data)
+      const jsonResponse = await response.json()
+      
+      // 3. Gradio returns outputs wrapped inside a "data" array as well.
+      // Our backend returns the dictionary as the first item in this array.
+      setResult(jsonResponse.data[0])
+      
     } catch (err) {
       setError(err.message || 'Unable to reach backend service.')
     } finally {
       setLoading(false)
     }
   }
-
   return (
     <div className="relative min-h-screen overflow-hidden px-4 py-8 sm:px-8 lg:py-12">
       <div className="scanline pointer-events-none absolute inset-0" />
