@@ -1,0 +1,11 @@
+pandas
+fastapi
+uvicorn[standard]
+pydantic
+python-dotenv
+langchain-huggingface
+langchain-chroma
+langchain-google-genai
+langchain-core
+sentence-transformers
+chromadb
