@@ -137,9 +137,9 @@ function App() {
       // 1. The client automatically connects and manages the ZeroGPU queue
       const app = await Client.connect(API_BASE)
       
-      // 2. "/predict" is the default endpoint for gr.Interface
+      // 2. "/simulate_policy" is the endpoint for simulating policies
       // It expects your inputs inside an array
-      const response = await app.predict("/predict", [policy])
+      const response = await app.predict("/simulate_policy", [policy])
       
       // 3. Gradio returns the output wrapped inside a "data" array
       setResult(response.data[0])
