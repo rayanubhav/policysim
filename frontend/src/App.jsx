@@ -18,7 +18,7 @@ import {
   XAxis,
   YAxis,
 } from 'recharts'
-
+import { Client } from '@gradio/client';
 const API_BASE = import.meta.env.VITE_API_BASE_URL ?? 'http://127.0.0.1:8000'
 
 const policiesByCategory = {
@@ -134,24 +134,15 @@ function App() {
     setError('')
 
     try {
-      // 1. Gradio automatically mounts the API at /call/predict
-      const response = await fetch(`${API_BASE}/call/predict`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        // 2. Gradio expects inputs to be wrapped inside a "data" array
-        body: JSON.stringify({ data: [policy] }),
-      })
-
-      if (!response.ok) {
-        const payload = await response.json().catch(() => ({}))
-        throw new Error(payload.detail || 'Simulation request failed')
-      }
-
-      const jsonResponse = await response.json()
+      // 1. The client automatically connects and manages the ZeroGPU queue
+      const app = await Client.connect(API_BASE)
       
-      // 3. Gradio returns outputs wrapped inside a "data" array as well.
-      // Our backend returns the dictionary as the first item in this array.
-      setResult(jsonResponse.data[0])
+      // 2. "/predict" is the default endpoint for gr.Interface
+      // It expects your inputs inside an array
+      const response = await app.predict("/predict", [policy])
+      
+      // 3. Gradio returns the output wrapped inside a "data" array
+      setResult(response.data[0])
       
     } catch (err) {
       setError(err.message || 'Unable to reach backend service.')
